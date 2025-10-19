@@ -19,14 +19,14 @@ export default function SupplierTable({ suppliers, onEdit, onDelete, onScreen }:
 
   const rows: GridRowsProp = suppliers.map((s) => ({
     id: s.id,
-    razonSocial: s.razonSocial,
-    nombreComercial: s.nombreComercial || '-',
-    identificacion: s.identificacion,
-    telefono: s.telefono || '-',
+    razonSocial: s.businessName,
+    nombreComercial: s.commercialName || '-',
+    identificacion: s.taxId,
+    telefono: s.phoneNumber || '-',
     email: s.email || '-',
-    pais: s.pais || '-',
-    facturacionAnualUSD: s.facturacionAnualUSD ?? 0,
-    updatedAt: new Date(s.updatedAt).toLocaleString(),
+    pais: s.country || '-',
+    facturacionAnualUSD: s.annualRevenueUsd ?? 0,
+    updatedAt: new Date(s.lastEditDate).toLocaleString(),
   }))
 
   const columns: GridColDef[] = [

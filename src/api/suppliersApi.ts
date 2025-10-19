@@ -2,16 +2,16 @@ import axios from 'axios'
 
 export type Supplier = {
   id: string
-  razonSocial: string
-  nombreComercial?: string
-  identificacion: string
-  telefono?: string
+  businessName: string
+  commercialName?: string
+  taxId: string
+  phoneNumber?: string
   email?: string
-  sitioWeb?: string
-  direccion?: string
-  pais?: string
-  facturacionAnualUSD?: number
-  updatedAt: string
+  website?: string
+  physicalAddress?: string
+  country?: string
+  annualRevenueUsd?: number
+  lastEditDate: string
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'
