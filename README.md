@@ -3,6 +3,8 @@
 Single Page Application (SPA) that allows users to manage a supplier inventory and perform **risk screening (cruce con listas de alto riesgo)** through integration with the backend API.  
 This project is part of the "Ejercicio 2: Desarrollo de aplicación web para Debida Diligencia de Proveedores y Cruce con Listas de Alto Riesgo".
 
+**🔗 Repository:** [https://github.com/JanielFranz/diligence-app](https://github.com/JanielFranz/diligence-app)
+
 ---
 
 ## 🚀 Overview
