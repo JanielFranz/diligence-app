@@ -33,12 +33,12 @@ export async function getSupplier(id: string): Promise<Supplier | undefined> {
   }
 }
 
-export async function createSupplier(data: Omit<Supplier, 'id' | 'updatedAt'>): Promise<Supplier> {
+export async function createSupplier(data: Omit<Supplier, 'id' | 'lastEditDate'>): Promise<Supplier> {
   const response = await axios.post(`${API_BASE_URL}/v1/supplier`, data)
   return response.data
 }
 
-export async function updateSupplier(id: string, data: Partial<Supplier>): Promise<Supplier | undefined> {
+export async function updateSupplier(id: string, data: Partial<Omit<Supplier, 'id' | 'lastEditDate'>>): Promise<Supplier | undefined> {
   try {
     const response = await axios.put(`${API_BASE_URL}/v1/supplier/${id}`, data)
     return response.data

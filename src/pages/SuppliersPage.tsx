@@ -24,7 +24,7 @@ export default function SuppliersPage() {
   })
 
   const updateM = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<api.Supplier> }) =>
+    mutationFn: ({ id, data }: { id: string; data: Partial<Omit<api.Supplier, 'id' | 'lastEditDate'>> }) =>
       api.updateSupplier(id, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['suppliers'] }),
   })
@@ -51,7 +51,7 @@ export default function SuppliersPage() {
     setFormOpen(true)
   }
 
-  async function handleSubmit(data: Omit<api.Supplier, 'id' | 'updatedAt'> & Partial<Pick<api.Supplier, 'id'>>) {
+  async function handleSubmit(data: Omit<api.Supplier, 'id' | 'lastEditDate'> & Partial<Pick<api.Supplier, 'id'>>) {
     try {
       if (editing && editing.id) {
         await updateM.mutateAsync({ id: editing.id, data })
