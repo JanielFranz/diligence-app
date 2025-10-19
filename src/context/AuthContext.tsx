@@ -1,15 +1,17 @@
 import { createContext, useState, useEffect } from 'react'
+import { login as apiLogin, setupAuthInterceptor, removeAuthInterceptor } from '../api/authApi'
+import type { LoginRequest, LoginResponse } from '../api/authApi'
+
 
 export interface User {
   id: string
-  email: string
-  name: string
+  username: string
 }
 
 interface AuthContextType {
   user: User | null
   token: string | null
-  login: (email: string, password: string) => Promise<void>
+  login: (username: string, password: string) => Promise<void>
   logout: () => void
   isLoading: boolean
 }
@@ -29,25 +31,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (savedToken && savedUser) {
       setToken(savedToken)
       setUser(JSON.parse(savedUser))
+      setupAuthInterceptor(savedToken)
     }
     setIsLoading(false)
   }, [])
 
-  const login = async (email: string, password: string) => {
-    // Mock authentication - in real app this would call the backend API
-    if (email === 'admin@test.com' && password === 'password') {
-      const mockUser: User = {
-        id: '1',
-        email: 'admin@test.com',
-        name: 'Administrador'
-      }
-      const mockToken = 'mock-jwt-token-12345'
+  const login = async (username: string, password: string) => {
+    try {
+      const credentials: LoginRequest = { username, password }
+      const response: LoginResponse = await apiLogin(credentials)
 
-      setUser(mockUser)
-      setToken(mockToken)
-      localStorage.setItem('auth_token', mockToken)
-      localStorage.setItem('auth_user', JSON.stringify(mockUser))
-    } else {
+      const user: User = {
+        id: response.id,
+        username: response.username
+      }
+
+      setUser(user)
+      setToken(response.token)
+      localStorage.setItem('auth_token', response.token)
+      localStorage.setItem('auth_user', JSON.stringify(user))
+      setupAuthInterceptor(response.token)
+    } catch {
       throw new Error('Credenciales inválidas')
     }
   }
@@ -57,6 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null)
     localStorage.removeItem('auth_token')
     localStorage.removeItem('auth_user')
+    removeAuthInterceptor()
   }
 
   return (

@@ -24,8 +24,8 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ onSuccess }: LoginFormProps) {
-  const [email, setEmail] = useState('admin@test.com')
-  const [password, setPassword] = useState('password')
+  const [username, setUsername] = useState('admin')
+  const [password, setPassword] = useState('123456')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -38,7 +38,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
     setIsLoading(true)
 
     try {
-      await login(email, password)
+      await login(username, password)
       onSuccess?.()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión')
@@ -86,9 +86,9 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         <TextField
           fullWidth
           label="Correo Electrónico"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
           variant="outlined"
           InputProps={{
