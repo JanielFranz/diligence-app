@@ -29,12 +29,15 @@ export default function LoginPage() {
   return (
     <Box
       sx={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        position: 'relative',
         overflow: 'hidden',
       }}
     >
@@ -47,7 +50,7 @@ export default function LoginPage() {
           width: 200,
           height: 200,
           borderRadius: '50%',
-          background: 'rgba(255, 255, 255, 0.1)',
+          background: 'rgba(255, 255, 255, 0.3)',
           animation: 'float 6s ease-in-out infinite',
         }}
       />
@@ -59,7 +62,7 @@ export default function LoginPage() {
           width: 300,
           height: 300,
           borderRadius: '50%',
-          background: 'rgba(255, 255, 255, 0.05)',
+          background: 'rgba(255, 255, 255, 0.15)',
           animation: 'float 8s ease-in-out infinite reverse',
         }}
       />
@@ -79,9 +82,9 @@ export default function LoginPage() {
               variant="h3"
               component="h1"
               sx={{
-                color: 'white',
+                color: '#2c3e50',
                 fontWeight: 700,
-                textShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                textShadow: '0 1px 3px rgba(0,0,0,0.1)',
                 mb: 1,
               }}
             >
@@ -90,9 +93,9 @@ export default function LoginPage() {
             <Typography
               variant="h6"
               sx={{
-                color: 'rgba(255, 255, 255, 0.9)',
+                color: '#546e7a',
                 fontWeight: 300,
-                textShadow: '0 1px 5px rgba(0,0,0,0.2)',
+                textShadow: '0 1px 2px rgba(0,0,0,0.05)',
               }}
             >
               Sistema de Gestión de Proveedores
