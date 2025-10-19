@@ -44,16 +44,21 @@ export default function SupplierTable({ suppliers, onEdit, onDelete, onScreen }:
       width: 160,
       sortable: false,
       renderCell: (params: GridRenderCellParams) => {
-        const row = suppliers.find((s) => s.id === String(params.id))!
+        const supplier = suppliers.find((s) => s.id === params.id)
+        if (!supplier) {
+          console.error('Supplier not found for id:', params.id)
+          return null
+        }
+
         return (
           <Stack direction="row" spacing={1}>
-            <IconButton color="primary" size="small" onClick={() => onEdit(row)}>
+            <IconButton color="primary" size="small" onClick={() => onEdit(supplier)}>
               <EditIcon />
             </IconButton>
-            <IconButton color="error" size="small" onClick={() => onDelete(row.id)}>
+            <IconButton color="error" size="small" onClick={() => onDelete(supplier.id)}>
               <DeleteIcon />
             </IconButton>
-            <Button variant="outlined" size="small" startIcon={<SearchIcon />} onClick={() => onScreen(row)}>
+            <Button variant="outlined" size="small" startIcon={<SearchIcon />} onClick={() => onScreen(supplier)}>
               Screen
             </Button>
           </Stack>

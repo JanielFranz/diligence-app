@@ -16,6 +16,8 @@ export default function SuppliersPage() {
     queryFn: api.listSuppliers
   })
 
+  console.log('suppliers data:', suppliers)
+
   const createM = useMutation({
     mutationFn: api.createSupplier,
     onSuccess: () => qc.invalidateQueries({ queryKey: ['suppliers'] }),
@@ -44,6 +46,7 @@ export default function SuppliersPage() {
   }
 
   function handleEdit(s: api.Supplier) {
+    console.log('Editing supplier:', s)
     setEditing(s)
     setFormOpen(true)
   }
