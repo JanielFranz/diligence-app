@@ -1,3 +1,5 @@
+import axios from 'axios'
+
 export type Supplier = {
   id: string
   razonSocial: string
@@ -12,98 +14,50 @@ export type Supplier = {
   updatedAt: string
 }
 
-const STORAGE_KEY = 'diligence_suppliers_v1'
-
-function readStore(): Supplier[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return []
-    return JSON.parse(raw) as Supplier[]
-  } catch (e) {
-    console.error('reading suppliers store', e)
-    return []
-  }
-}
-
-function writeStore(list: Supplier[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list))
-}
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'
 
 export async function listSuppliers(): Promise<Supplier[]> {
-  await new Promise((r) => setTimeout(r, 250))
-  return readStore()
+  const response = await axios.get(`${API_BASE_URL}/v1/supplier`)
+  return response.data
 }
 
 export async function getSupplier(id: string): Promise<Supplier | undefined> {
-  await new Promise((r) => setTimeout(r, 150))
-  return readStore().find((s) => s.id === id)
+  try {
+    const response = await axios.get(`${API_BASE_URL}/v1/supplier/${id}`)
+    return response.data
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return undefined
+    }
+    throw error
+  }
 }
 
 export async function createSupplier(data: Omit<Supplier, 'id' | 'updatedAt'>): Promise<Supplier> {
-  const list = readStore()
-  const newItem: Supplier = {
-    ...data,
-    id: Math.random().toString(36).slice(2, 9),
-    updatedAt: new Date().toISOString(),
-  }
-  list.unshift(newItem)
-  writeStore(list)
-  await new Promise((r) => setTimeout(r, 200))
-  return newItem
+  const response = await axios.post(`${API_BASE_URL}/v1/supplier`, data)
+  return response.data
 }
 
 export async function updateSupplier(id: string, data: Partial<Supplier>): Promise<Supplier | undefined> {
-  const list = readStore()
-  const idx = list.findIndex((s) => s.id === id)
-  if (idx === -1) return undefined
-  const updated = { ...list[idx], ...data, updatedAt: new Date().toISOString() }
-  list[idx] = updated
-  writeStore(list)
-  await new Promise((r) => setTimeout(r, 200))
-  return updated
+  try {
+    const response = await axios.put(`${API_BASE_URL}/v1/supplier/${id}`, data)
+    return response.data
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return undefined
+    }
+    throw error
+  }
 }
 
 export async function deleteSupplier(id: string): Promise<boolean> {
-  const list = readStore()
-  const next = list.filter((s) => s.id !== id)
-  writeStore(next)
-  await new Promise((r) => setTimeout(r, 150))
-  return true
-}
-
-// Seed some sample data if empty
-(function seed() {
-  const current = readStore()
-  if (current.length === 0) {
-    const samples: Supplier[] = [
-      {
-        id: 'a1',
-        razonSocial: 'Comercial Andes S.A.',
-        nombreComercial: 'Andes',
-        identificacion: '123456789',
-        telefono: '+593987654321',
-        email: 'ventas@andes.com',
-        sitioWeb: 'https://andes.example',
-        direccion: 'Av. Principal 123',
-        pais: 'Ecuador',
-        facturacionAnualUSD: 1200000,
-        updatedAt: new Date().toISOString(),
-      },
-      {
-        id: 'b2',
-        razonSocial: 'Servicios del Pacífico S.R.L.',
-        nombreComercial: 'Pacífico',
-        identificacion: '987654321',
-        telefono: '+593912345678',
-        email: 'contacto@pacifico.example',
-        sitioWeb: 'https://pacifico.example',
-        direccion: 'Calle Secundaria 45',
-        pais: 'Perú',
-        facturacionAnualUSD: 850000,
-        updatedAt: new Date().toISOString(),
-      },
-    ]
-    writeStore(samples)
+  try {
+    await axios.delete(`${API_BASE_URL}/v1/supplier/${id}`)
+    return true
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return false
+    }
+    throw error
   }
-})()
-
+}
