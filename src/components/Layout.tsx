@@ -18,16 +18,13 @@ export default function Layout({ children }: Props) {
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <AppBar position="static">
         <Toolbar>
-          <IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
-            <MenuIcon />
-          </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Debida Diligencia - Proveedores
           </Typography>
           {user && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-                {user.name}
+                {user.username}
               </Typography>
               <Button
                 color="inherit"

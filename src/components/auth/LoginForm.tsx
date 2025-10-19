@@ -169,7 +169,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
           Demo - Credenciales de prueba:
         </Typography>
         <Typography variant="body2" sx={{ textAlign: 'center', fontFamily: 'monospace', mt: 0.5 }}>
-          admin@test.com / password
+          admin / 123456
         </Typography>
       </Box>
     </Paper>
