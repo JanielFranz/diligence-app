@@ -45,14 +45,9 @@ The frontend consumes the backend REST API built with **.NET 8 (ASP.NET Core)** 
 ### Screening (Cruce con Listas de Alto Riesgo)
 - Option available per supplier in the table.
 - Opens a **Material UI Modal** with:
-    - Checkbox selection for sources (OFAC, EU, UN).
+    - Checkbox selection for sources (OFAC, WolrdBank).
     - Automatic API call once the user selects the sources.
-- Displays results in a dynamic table:
-    - Fuente
-    - Nombre Coincidente
-    - Tipo de Coincidencia
-    - Nivel de Riesgo
-    - Detalles
+- Displays results in a dynamic table
 
 ### User Experience
 - SPA routing handled by React Router.
@@ -135,7 +130,7 @@ frontend/
 Create a `.env` file in the project root:
 
 ```bash
-VITE_API_BASE_URL=http://localhost:5000/api
+VITE_API_BASE_URL=https://localhost:44312/api
 ```
 
 ## ️🧩 Installation and Setup
