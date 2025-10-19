@@ -19,7 +19,7 @@ import {
   Typography,
 } from '@mui/material'
 import { runScreening } from '../api/screeningApi'
-import type { ScreeningSource, ScreeningResult } from '../api/screeningApi'
+import type { ScreeningResult, OFACScreeningResult, WorldBankScreeningResult } from '../api/screeningApi'
 import type { Supplier } from '../api/suppliersApi'
 
 type Props = {
@@ -28,82 +28,162 @@ type Props = {
   onClose: () => void
 }
 
-export default function ScreeningModal({ open, supplier, onClose }: Props) {
-  const [sources, setSources] = useState<ScreeningSource[]>(['OFAC'])
-  const [loading, setLoading] = useState(false)
-  const [results, setResults] = useState<ScreeningResult[]>([])
+type SourceFilter = {
+  ofac: boolean
+  worldBank: boolean
+}
 
+export default function ScreeningModal({ open, supplier, onClose }: Props) {
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>({ ofac: true, worldBank: false })
+  const [loading, setLoading] = useState(false)
+  const [screeningData, setScreeningData] = useState<ScreeningResult | null>(null)
+  const [filteredResults, setFilteredResults] = useState<(OFACScreeningResult | WorldBankScreeningResult)[]>([])
+
+  // Reset state when modal opens
   useEffect(() => {
     if (!open) return
-    setResults([])
-    setSources(['OFAC'])
+    setScreeningData(null)
+    setFilteredResults([])
+    setSourceFilter({ ofac: true, worldBank: false })
   }, [open])
 
+  // Run screening when modal opens and supplier is available
   useEffect(() => {
     let mounted = true
-    async function run() {
-      if (!supplier) return
-      if (sources.length === 0) {
-        setResults([])
-        return
-      }
+    async function runScreeningRequest() {
+      if (!supplier || !open) return
+
       setLoading(true)
       try {
-        const res = await runScreening(sources, supplier.razonSocial)
+        const supplierId = parseInt(supplier.id)
+        const res = await runScreening(supplierId)
         if (!mounted) return
-        setResults(res)
+        console.log('Screening results:', res)
+        setScreeningData(res)
       } catch (e) {
-        console.error(e)
+        console.error('Error running screening:', e)
       } finally {
         if (mounted) setLoading(false)
       }
     }
-    run()
+    runScreeningRequest()
     return () => {
       mounted = false
     }
-  }, [sources, supplier])
+  }, [supplier, open])
 
-  function toggleSource(s: ScreeningSource) {
-    setSources((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]))
+  // Filter results based on source selection
+  useEffect(() => {
+    if (!screeningData) {
+      setFilteredResults([])
+      return
+    }
+
+    const filtered: (OFACScreeningResult | WorldBankScreeningResult)[] = []
+
+    // Add OFAC results if selected
+    if (sourceFilter.ofac && screeningData.results.ofac) {
+      filtered.push(...screeningData.results.ofac)
+    }
+
+    // Add World Bank results if selected
+    if (sourceFilter.worldBank && screeningData.results.worldBank) {
+      filtered.push(...screeningData.results.worldBank)
+    }
+
+    setFilteredResults(filtered)
+  }, [screeningData, sourceFilter])
+
+  function toggleSource(source: keyof SourceFilter) {
+    setSourceFilter(prev => ({
+      ...prev,
+      [source]: !prev[source]
+    }))
+  }
+
+  function getSourceName(result: OFACScreeningResult | WorldBankScreeningResult): string {
+    return 'id' in result ? 'OFAC' : 'World Bank'
+  }
+
+  function getResultName(result: OFACScreeningResult | WorldBankScreeningResult): string {
+    return 'id' in result ? result.name : result.firmName
+  }
+
+
+
+  function getRiskLevel(result: OFACScreeningResult | WorldBankScreeningResult): string {
+    if ('id' in result) {
+      return result.sourceList.includes('SDN') ? 'Alto' : 'Medio'
+    } else {
+      return 'Medio'
+    }
+  }
+
+  function getDetails(result: OFACScreeningResult | WorldBankScreeningResult): string {
+    if ('id' in result) {
+      return `${result.programs} - ${result.sourceList}`
+    } else {
+      return `${result.grounds} (${result.fromDate} - ${result.toDate})`
+    }
   }
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>Screening - {supplier?.razonSocial || 'Proveedor'}</DialogTitle>
+      <DialogTitle>Screening - {supplier?.businessName || 'Proveedor'}</DialogTitle>
       <DialogContent>
         <Box sx={{ my: 1 }}>
-          <Typography variant="subtitle2">Fuentes</Typography>
-          <FormControlLabel control={<Checkbox checked={sources.includes('OFAC')} onChange={() => toggleSource('OFAC')} />} label="OFAC" />
-          <FormControlLabel control={<Checkbox checked={sources.includes('EU')} onChange={() => toggleSource('EU')} />} label="EU" />
-          <FormControlLabel control={<Checkbox checked={sources.includes('UN')} onChange={() => toggleSource('UN')} />} label="UN" />
+          <Typography variant="subtitle2">Filtrar por Fuentes</Typography>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={sourceFilter.ofac}
+                onChange={() => toggleSource('ofac')}
+              />
+            }
+            label="OFAC"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={sourceFilter.worldBank}
+                onChange={() => toggleSource('worldBank')}
+              />
+            }
+            label="World Bank"
+          />
         </Box>
         {loading && <LinearProgress />}
 
         <Box sx={{ mt: 2 }}>
           <Typography variant="h6">Resultados</Typography>
-          {results.length === 0 && !loading && <Typography sx={{ mt: 1 }}>No se encontraron coincidencias.</Typography>}
+          {filteredResults.length === 0 && !loading && (
+            <Typography sx={{ mt: 1 }}>
+              {!screeningData || screeningData.total_hits === 0
+                ? 'No se encontraron coincidencias en ninguna fuente.'
+                : 'No se encontraron coincidencias para las fuentes seleccionadas.'
+              }
+            </Typography>
+          )}
 
-          {results.length > 0 && (
+          {filteredResults.length > 0 && (
             <TableContainer component={Paper} sx={{ mt: 1 }}>
               <Table>
                 <TableHead>
                   <TableRow>
                     <TableCell>Fuente</TableCell>
                     <TableCell>Nombre Coincidente</TableCell>
-                    <TableCell>Tipo de Coincidencia</TableCell>
+
                     <TableCell>Nivel de Riesgo</TableCell>
                     <TableCell>Detalles</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {results.map((r, i) => (
+                  {filteredResults.map((result, i) => (
                     <TableRow key={i}>
-                      <TableCell>{r.fuente}</TableCell>
-                      <TableCell>{r.nombreCoincidente}</TableCell>
-                      <TableCell>{r.tipoCoincidencia}</TableCell>
-                      <TableCell>{r.nivelRiesgo}</TableCell>
-                      <TableCell>{r.detalles}</TableCell>
+                      <TableCell>{getSourceName(result)}</TableCell>
+                      <TableCell>{getResultName(result)}</TableCell>
+                      <TableCell>{getRiskLevel(result)}</TableCell>
+                      <TableCell>{getDetails(result)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

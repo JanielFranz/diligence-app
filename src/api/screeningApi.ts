@@ -1,38 +1,41 @@
-export type ScreeningSource = 'OFAC' | 'EU' | 'UN'
+import axios from 'axios'
+
+export type ScreeningSource = {
+  ofac: number
+  worldBank: number
+}
+
+export type OFACScreeningResult = {
+  id: number
+  name: string
+  type: string
+  programs: string
+  sourceList: string
+  address: string
+}
+
+export type WorldBankScreeningResult = {
+  firmName: string
+  address: string
+  country: string
+  fromDate: string
+  toDate: string
+  grounds: string
+}
 
 export type ScreeningResult = {
-  fuente: ScreeningSource
-  nombreCoincidente: string
-  tipoCoincidencia: string
-  nivelRiesgo: 'Alto' | 'Medio' | 'Bajo'
-  detalles?: string
+  query: string
+  total_hits: number
+  results: {
+    ofac: OFACScreeningResult[]
+    worldBank: WorldBankScreeningResult[]
+  }
+  sources: ScreeningSource
 }
 
-export async function runScreening(sources: ScreeningSource[], supplierName: string): Promise<ScreeningResult[]> {
-  // Simula llamadas a fuentes externas
-  await new Promise((r) => setTimeout(r, 600))
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:44312/api'
 
-  const results: ScreeningResult[] = []
-  if (sources.includes('OFAC') && supplierName.toLowerCase().includes('andes')) {
-    results.push({
-      fuente: 'OFAC',
-      nombreCoincidente: 'Andes Trading',
-      tipoCoincidencia: 'Nombre similar',
-      nivelRiesgo: 'Medio',
-      detalles: 'Coincidencia parcial en nombre comercial',
-    })
-  }
-  if (sources.includes('EU') && supplierName.toLowerCase().includes('pac')) {
-    results.push({
-      fuente: 'EU',
-      nombreCoincidente: 'Pacific Services',
-      tipoCoincidencia: 'Identificación',
-      nivelRiesgo: 'Alto',
-      detalles: 'Coincidencia de identificador fiscal con persona en lista',
-    })
-  }
-
-  // Devuelve resultados vacíos si no hay coincidencias
-  return results
+export async function runScreening(supplierId: number): Promise<ScreeningResult> {
+  const response = await axios.get(`${API_BASE_URL}/v1/screen/supplier/${supplierId}`)
+  return response.data
 }
-
