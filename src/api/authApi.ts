@@ -13,7 +13,7 @@ export interface LoginResponse {
 
 
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:44312/api'
 
 export async function login(credentials: LoginRequest): Promise<LoginResponse> {
   const response = await axios.post(`${API_BASE_URL}/v1/authentication/sign-in`, credentials)
